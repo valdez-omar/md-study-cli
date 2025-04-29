@@ -113,8 +113,30 @@ func GenerateFlashcardsForAllNotes() error {
 
 	fmt.Printf("Found %d notes to process\n", len(notes))
 
+	// First, get all existing flashcards
+	existingCards, err := storage.GetAllFlashcards()
+	if err != nil {
+		return fmt.Errorf("failed to get existing flashcards: %w", err)
+	}
+
+	// Create a map to track which notes already have flashcards
+	notesWithCards := make(map[string]bool)
+	for _, card := range existingCards {
+		notesWithCards[card.NoteID] = true
+	}
+
+	// Track how many notes were processed
+	processedCount := 0
+
 	for i, note := range notes {
+		// Skip notes that already have flashcards
+		if notesWithCards[note.ID] {
+			fmt.Printf("[%d/%d] Skipping %s (already has flashcards)\n", i+1, len(notes), note.Filename)
+			continue
+		}
+
 		fmt.Printf("[%d/%d] Generating flashcards for %s...\n", i+1, len(notes), note.Filename)
+		processedCount++
 
 		// Generate flashcards for this note
 		flashcards, err := GenerateFlashcards(note.ID)
@@ -130,6 +152,10 @@ func GenerateFlashcardsForAllNotes() error {
 		}
 
 		fmt.Printf("  Created %d flashcards\n", len(flashcards))
+	}
+
+	if processedCount == 0 {
+		fmt.Println("No new notes to process. All notes already have flashcards.")
 	}
 
 	return nil

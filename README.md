@@ -37,7 +37,7 @@ make install
 ### Workflow
 
 1. **Import** markdown files
-2. **Generate** flashcards using AI
+2. **Generate** flashcards using AI (will only process notes without existing flashcards)
 3. **Study** with spaced repetition
 4. View study **stats**
 
